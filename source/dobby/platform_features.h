@@ -1,7 +1,16 @@
 #pragma once
 
+// __has_feature is only supported in clang or gcc >= 14.0. To avoid compilation failure in lower versions
+// of gcc, please should not use this extension directly in project.
+#if defined(__has_feature)
+// ptrauth_calls is only implemented in Apple Clang.
+#if __has_feature(ptrauth_calls) // Do not use && directly, it will cause gcc < 14.0 to fail to compile
+#define __has_ptrauth_calls (1)
+#endif
+#endif
+
 #if defined(__APPLE__) && __arm64e__
-#if __has_feature(ptrauth_calls)
+#if __has_ptrauth_calls
 #include <ptrauth.h>
 #endif
 #endif

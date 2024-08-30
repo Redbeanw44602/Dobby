@@ -43,11 +43,9 @@ const char *func_short_array[] = {
 // clang-format on
 
 #define pac_strip(symbol)
-#if defined(__APPLE__) && __arm64e__
-#if __has_feature(ptrauth_calls)
+#if __has_ptrauth_calls
 #define pac_strip(symbol)
 //#define pac_strip(symbol) *(void **)&symbol = (void *)ptrauth_sign_unauthenticated((void *)symbol, ptrauth_key_asia, 0)
-#endif
 #endif
 
 #define install_hook(name, fn_ret_t, fn_args_t...)                                                                     \

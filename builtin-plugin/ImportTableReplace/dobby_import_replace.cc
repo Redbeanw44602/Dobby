@@ -172,13 +172,13 @@ PUBLIC int DobbyImportTableReplace(char *image_name, char *symbol_name, void *fa
     if (stub) {
       void *orig_func;
       orig_func = *(void **)stub;
-#if __has_feature(ptrauth_calls)
+#if __has_ptrauth_calls
       orig_func = ptrauth_strip(orig_func, ptrauth_key_asia);
       orig_func = ptrauth_sign_unauthenticated(orig_func, ptrauth_key_asia, 0);
 #endif
       *orig_func_ptr = orig_func;
 
-#if __has_feature(ptrauth_calls)
+#if __has_ptrauth_calls
       fake_func = (void *)ptrauth_strip(fake_func, ptrauth_key_asia);
       fake_func = ptrauth_sign_unauthenticated(fake_func, ptrauth_key_asia, stub);
 #endif
