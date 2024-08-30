@@ -349,6 +349,8 @@ endif ()
 
 # ---
 
+target_link_libraries(dobby pthread)
+
 if (SYSTEM.Android)
   target_link_libraries(dobby log)
   if (PROCESSOR.ARM)
