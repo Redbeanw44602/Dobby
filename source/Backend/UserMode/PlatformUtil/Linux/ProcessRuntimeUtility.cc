@@ -153,15 +153,16 @@ static tinystl::vector<RuntimeModule> &get_process_map_with_proc_maps() {
     if (strcmp(permissions, "r--p") != 0 && strcmp(permissions, "r-xp") != 0)
       continue;
 
+    char *path_buffer = line_buffer + path_index;
+    if (*path_buffer == 0 || *path_buffer == '\n' || *path_buffer == '[')
+      continue;
+
     // check elf magic number
     ElfW(Ehdr) *header = (ElfW(Ehdr) *)region_start;
     if (memcmp(header->e_ident, ELFMAG, SELFMAG) != 0) {
       continue;
     }
 
-    char *path_buffer = line_buffer + path_index;
-    if (*path_buffer == 0 || *path_buffer == '\n' || *path_buffer == '[')
-      continue;
     RuntimeModule module;
 
     // strip
