@@ -16,7 +16,12 @@ auto_source_group("." "auto-source-group" "\\.(cc|cpp|c|h)$")
 
 # --- options
 
-option(DOBBY_DEBUG "Enable debug logging" OFF)
+set(DOBBY_DEBUG_DEFAULT OFF)
+if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(DOBBY_DEBUG_DEFAULT ON)
+endif()
+
+option(DOBBY_DEBUG "Enable debug logging" ${DOBBY_DEBUG_DEFAULT})
 
 option(NearBranch "Enable near branch trampoline" ON)
 
@@ -37,26 +42,21 @@ option(DOBBY_BUILD_KERNEL_MODE "Build xnu kernel mode" OFF)
 
 option(Private.Obfuscation "Enable llvm obfuscation" OFF)
 
-if ((NOT DEFINED CMAKE_BUILD_TYPE) OR (CMAKE_BUILD_TYPE STREQUAL "Debug"))
-  set(DOBBY_DEBUG ON)
-endif ()
-
-
 set(compile_definitions "")
 
 # for arm64, allow access q8 - q31
 if (FullFloatingPointRegisterPack)
-  set(compile_definitions "${compile_definitions} -DFULL_FLOATING_POINT_REGISTER_PACK")
+  list(APPEND compile_definitions FULL_FLOATING_POINT_REGISTER_PACK)
 endif ()
 
 if (DOBBY_BUILD_KERNEL_MODE)
-  set(compile_definitions "${compile_definitions} -DBUILDING_KERNEL")
+  list(APPEND compile_definitions BUILDING_KERNEL)
 endif ()
 
 if (DOBBY_DEBUG)
-  set(compile_definitions "${compile_definitions} -DDOBBY_DEBUG")
+  list(APPEND compile_definitions DOBBY_DEBUG)
 else ()
-  set(compile_definitions "${compile_definitions} -DDOBBY_LOGGING_DISABLE")
+  list(APPEND compile_definitions DOBBY_LOGGING_DISABLE)
 endif ()
 
 if (CMAKE_GENERATOR STREQUAL Xcode)
@@ -214,7 +214,7 @@ if (0 AND SYSTEM.iOS AND (NOT DOBBY_BUILD_KERNEL_MODE))
   include_directories(
     source/Backend/UserMode/ExecMemory/substrated
   )
-  set(compile_definitions "${compile_definitions} -DCODE_PATCH_WITH_SUBSTRATED")
+  list(APPEND compile_definitions CODE_PATCH_WITH_SUBSTRATED)
   set(dobby.SOURCE_FILE_LIST ${dobby.SOURCE_FILE_LIST}
     source/Backend/UserMode/ExecMemory/substrated/mach_interface_support
     )
@@ -284,7 +284,7 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
   endif ()
 endif ()
 set(DOBBY_BUILD_VERSION "Dobby${VERSION_REVISION}")
-set(compile_definitions "${compile_definitions} -D__DOBBY_BUILD_VERSION__=\"${DOBBY_BUILD_VERSION}\"")
+list(APPEND compile_definitions "__DOBBY_BUILD_VERSION__=\"${DOBBY_BUILD_VERSION}\"")
 message(STATUS "[Dobby] ${DOBBY_BUILD_VERSION}")
 
 # ---
@@ -334,12 +334,8 @@ set_target_properties(dobby_static
   COMPILE_FLAGS "${compiler_flags}"
   )
 
-target_compile_definitions(dobby PRIVATE
-  "COMPILE_DEFINITIONS ${compile_definitions}"
-  )
-target_compile_definitions(dobby_static PRIVATE
-  "COMPILE_DEFINITIONS ${compile_definitions}"
-  )
+target_compile_definitions(dobby PRIVATE ${compile_definitions})
+target_compile_definitions(dobby_static PRIVATE ${compile_definitions})
 
 # ---
 
